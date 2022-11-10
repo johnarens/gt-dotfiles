@@ -5,11 +5,14 @@ This is my configuration for Emacs 26.3 that comes with Ubuntu 20.04.
 
 * Settings independent of packages
 #+BEGIN_SRC emacs-lisp
+  (defun jwa/frame-title-format ()
+    (concat "%b" " " "<%f> " "  theme:" (symbol-name (car custom-enabled-themes))))
+
   (use-package emacs
     :preface
     (defvar jwa/indent-width 4) ; change this value to your preferred width
     :config
-    (setq frame-title-format "%b <%f>")    ; (setq frame-title-format '("My Emacs Configuration") ;
+    (setq frame-title-format (jwa/frame-title-format)
           ring-bell-function 'ignore       ; minimize distraction
           frame-resize-pixelwise t
           default-directory "~/")
@@ -196,7 +199,6 @@ of the new-line-and-push-brace feature.
 #+END_SRC
 
 
-
 ** Dired tweaks
 Delete intermediate buffers when navigating through dired.
 #+begin_src emacs-lisp
@@ -222,8 +224,70 @@ Normally, we need to add ~:ensure t~ to tell ~use-package~ to download packages 
 ** GUI enhancements
 *** Load custom theme
 #+BEGIN_SRC emacs-lisp
-  (add-to-list 'custom-theme-load-path (concat user-emacs-directory "themes/"))
-  (load-theme 'wilmersdorf t) ; an orginal theme created by Ian.
+  ;; (add-to-list 'custom-theme-load-path (concat user-emacs-directory "themes/"))
+  ;; (load-theme 'wilmersdorf t) ; an orginal theme created by Ian.
+
+  ;;(use-package zenburn-theme
+  ;;   :init (load-theme (quote zenburn) t t))
+  ;;
+  ;;(use-package solarized-theme
+  ;;   :init (load-theme (quote solarized-dark) t t))
+  ;;
+  
+  ;; Missing dependency cycle-themes
+  (require 'cl)
+  ;;(use-package cycle-themes
+  ;;  :ensure t
+  ;;  :init (setq cycle-themes-theme-list
+  ;;        '(zenburn solarized-dark))
+  ;;  :config (cycle-themes-mode)
+  ;;  :bind ("C-c C-t" . cycle-themes))
+
+  (use-package leuven-theme
+    :init (load-theme 'leuven-dark t))
+
+  (use-package solarized-theme
+    :init (load-theme 'solarized-dark t))
+
+  ;; (use-package color-theme-sanityinc-tomorrow
+  ;;  :init (load-theme 'color-theme-sanityinc-tomorrow-night t))
+
+  (use-package monokai-alt-theme
+    :init (load-theme 'monokai t))
+  
+  ;; (use-package color-theme-sanityinc-solarized
+  ;;   :init (load-theme 'color-theme-sanityinc-solarized-dark t t))
+
+  ;; (use-package gruvbox-theme
+  ;;   :init (load-theme 'gruvbox-dark-medium t t))
+  ;;   ;; :init (load-theme 'gruvbox-dark-soft t t))
+  ;;   ;; :init (load-theme 'gruvbox-dark-hard t t))
+
+  ;; (use-package material-theme
+  ;;   :init (load-theme 'material-dark t t))
+  ;;   ;; :init (load-theme 'material-light t t))
+  
+  (use-package dracula-theme
+    :init (load-theme 'dracula t t))
+  
+  (use-package zenburn-theme
+    :init (load-theme 'zenburn t t))
+  
+  (use-package cycle-themes
+    :ensure t
+    :init (setq cycle-themes-theme-list
+          '(solarized-dark leuven-dark monokai material material-light dracula zenburn))
+    :config
+      (cycle-themes-mode)
+      (setq frame-title-format (jwa/frame-title-format))
+    ;; :hook (cycle-themes-after-cycle-hook . (lambda () (message "%s" (car custom-enabled-themes))))
+    ;; :hook (cycle-themes-after-cycle-hook . (lambda () (message "XXX %s" (car custom-enabled-themes))))
+    :bind ("<f6>" . cycle-themes))
+
+  (add-hook 'cycle-themes-after-cycle-hook
+  #'(lambda ()(setq frame-title-format (jwa/frame-title-format))))
+
+
 #+END_SRC
 *** Dashboard welcome page
 #+BEGIN_SRC emacs-lisp
@@ -251,6 +315,8 @@ Tell magit to automatically put us in vi-insert-mode when committing a change.
   ;; (use-package magit
   ;;   :bind ("C-x g" . magit-status)
   ;;   :config (add-hook 'with-editor-mode-hook #'evil-insert-state))
+  (use-package magit
+     :bind ("C-x g" . magit-s))
 #+END_SRC
 ** Searching/sorting enhancements & project management
 *** Ido, ido-vertical, ido-ubiquitous and fuzzy matching
@@ -297,7 +363,11 @@ Use ~C-n~ and ~C-p~ to navigate the tooltip.
 *** Flycheck
 A modern on-the-fly syntax checking extension -- absolute essential
 #+BEGIN_SRC emacs-lisp
-  (use-package flycheck :config (global-flycheck-mode +1))
+  (use-package flycheck
+    :config
+    (setq flycheck-python-flake8-executable "flake8")
+    (flycheck-select-checker 'python-flake8)
+    (global-flycheck-mode +1))
 #+END_SRC
 *** Org Mode
 Some minimal org mode tweaks: org-bullets gives our headings (h1, h2,
@@ -346,6 +416,56 @@ Markdown mode and Web mode, the latter covers our usages of HTML/CSS/JS/JSX/TS/T
     )
 #+END_SRC
 
+*** Language Server Protocol
+#+BEGIN_SRC emacs-lisp
+  (use-package lsp-mode
+    :hook ((python-mode c++-mode c-mode) . lsp-deferred)
+    :commands lsp)
+
+  (use-package lsp-ui
+    :commands lsp-ui-mode
+    :config
+    (setq lsp-ui-doc-enable nil)
+    (setq lsp-ui-doc-header t)
+    (setq lsp-ui-doc-include-signature t)
+    (setq lsp-ui-doc-border (face-foreground 'default))
+    (setq lsp-ui-sideline-show-code-actions t)
+    (setq lsp-ui-sideline-delay 0.05))
+
+  (use-package lsp-pyright
+    :hook (python-mode . (lambda () (require 'lsp-pyright)))
+    :init (when (executable-find "python3")
+          (setq lsp-pyright-python-executable-cmd "python3")))
+
+  (use-package lsp-mode
+    :hook ((c-mode          ; clangd
+            c++-mode        ; clangd
+            c-or-c++-mode   ; clangd
+            python-mode     ; pyright
+            web-mode        ; ts-ls/HTML/CSS
+            ) . lsp-deferred)
+    :commands lsp
+    :config
+    (setq lsp-auto-guess-root t)
+    (setq lsp-log-io nil)
+    (setq lsp-restart 'auto-restart)
+    (setq lsp-enable-symbol-highlighting nil)
+    (setq lsp-enable-on-type-formatting nil)
+    (setq lsp-signature-auto-activate nil)
+    (setq lsp-signature-render-documentation nil)
+    (setq lsp-eldoc-hook nil)
+    (setq lsp-modeline-code-actions-enable nil)
+    (setq lsp-modeline-diagnostics-enable nil)
+    (setq lsp-headerline-breadcrumb-enable nil)
+    (setq lsp-semantic-tokens-enable nil)
+    (setq lsp-enable-folding nil)
+    (setq lsp-enable-imenu nil)
+    (setq lsp-enable-snippet nil)
+    (setq read-process-output-max (* 1024 1024)) ;; 1MB
+    (setq lsp-idle-delay 0.5))
+
+
+#+END_SRC
 ** Miscellaneous
 *** Diminish minor modes
 The diminish package is used to hide unimportant minor modes in the
@@ -370,4 +490,9 @@ Provides us with hints on available keystroke combinations.
   (use-package exec-path-from-shell
     :config (when (memq window-system '(mac ns x))
               (exec-path-from-shell-initialize)))
+#+END_SRC
+*** NeoTree
+#+BEGIN_SRC emacs-lisp
+  (use-package neotree
+    :bind ("<f8>" . neotree-toggle))
 #+END_SRC
