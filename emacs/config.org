@@ -380,7 +380,9 @@ A modern on-the-fly syntax checking extension -- absolute essential
 (use-package flycheck
   :config
   (flycheck-add-mode 'python-flake8 'python-mode)
-  :hook (python-mode . flycheck-mode))
+  :hook
+  (python-mode . flycheck-mode)
+  (verilog-mode . flycheck-mode))
   ;; :hook (flycheck-mode . python-mode))
 
 ;; (add-hook 'python-mode-hook 'flycheck-mode)
@@ -444,17 +446,13 @@ Markdown mode and Web mode, the latter covers our usages of HTML/CSS/JS/JSX/TS/T
   ;;   ;; :hook ((c++-mode c-mode) . lsp-deferred)
   ;;   :commands lsp)
 
-  ;; (use-package lsp-pyright
-  ;;   :hook (python-mode . (lambda () (require 'lsp-pyright)))
-  ;;   :init (when (executable-find "python3")
-  ;;         (setq lsp-pyright-python-executable-cmd "python3")))
-
   (use-package lsp-mode
     :hook ((c-mode          ; clangd
             c++-mode        ; clangd
             c-or-c++-mode   ; clangd
             ;; python-mode     ; pyright
-            ;; python-mode     ; jedi
+            python-mode     ; jedi
+            ;; verilog-mode
             web-mode        ; ts-ls/HTML/CSS
             ) . lsp-deferred)
     :commands lsp
@@ -474,6 +472,8 @@ Markdown mode and Web mode, the latter covers our usages of HTML/CSS/JS/JSX/TS/T
     (setq lsp-enable-folding nil)
     (setq lsp-enable-imenu nil)
     (setq lsp-enable-snippet nil)
+    ;; (setq lsp-diagnostics-provider :flycheck)
+    (setq lsp-diagnostics-provider :none)
     (setq read-process-output-max (* 1024 1024)) ;; 1MB
     (setq lsp-idle-delay 0.5))
 
@@ -487,13 +487,18 @@ Markdown mode and Web mode, the latter covers our usages of HTML/CSS/JS/JSX/TS/T
     (setq lsp-ui-sideline-show-code-actions t)
     (setq lsp-ui-sideline-delay 0.05))
 
-;; (use-package lsp-jedi
-;;   :ensure t
-;;   :config
-;;   (with-eval-after-load "lsp-mode"
-;;     (add-to-list 'lsp-disabled-clients 'pyls)
-;;     (add-to-list 'lsp-enabled-clients 'jedi)))
-;; 
+  ;; (use-package lsp-pyright
+  ;;   :hook (python-mode . (lambda () (require 'lsp-pyright)))
+  ;;   :init (when (executable-find "python3")
+  ;;         (setq lsp-pyright-python-executable-cmd "python3")))
+
+(use-package lsp-jedi
+  :ensure t
+  :config
+  (with-eval-after-load "lsp-mode"
+    (add-to-list 'lsp-disabled-clients 'pyls)
+    (add-to-list 'lsp-enabled-clients 'jedi)))
+
 
 #+END_SRC
 *** python-mode
@@ -526,8 +531,17 @@ Markdown mode and Web mode, the latter covers our usages of HTML/CSS/JS/JSX/TS/T
 
 ;; (add-hook 'python-mode #'(lambda () (flycheck-select-checker 'python-flake8)))
 
-#+END_SRC
+(defun jwa/python-mode-hook ()
+  (add-to-list 'company-backends 'company-jedi))
 
+;; (add-hook 'python-mode-hook 'jwa/python-mode-hook)
+
+#+END_SRC
+*** verilog-mode
+#+BEGIN_SRC emacs-lisp
+(setq verilog-indent-begin-after-if nil)
+
+#+END_SRC
 ** Miscellaneous
 *** Diminish minor modes
 The diminish package is used to hide unimportant minor modes in the

@@ -1,4 +1,4 @@
-import numpy as np
+import numpy as np # noqa
 
 x = 10
 
@@ -9,13 +9,15 @@ else:
 
 y = np.arange(1, 10)
 # this is a really long comment that is too long for the requirement in PEP8.  When asdfasdfasdfadfadsfasdfasdfasfd # noqa
-# this is a really long comment that is too long for the requirement in PEP8.  When asdfasdfasdfadfadsfasdfasdfasfd
+# this is a really long comment that is too long for the requirement in PEP8.  When asdfasdfasdfadfadsfasdfasdfasfd 
 z = 10
 
 
 long_var_name = 10
 long_var_name = 20
 
+long_var_name = 50
+long_var_name = 25
 
 # asdadfafddff asdfadfdasf
 
@@ -31,5 +33,3 @@ class xyz:
         """Do stuff."""
         y = x + 1
         return y
-
-
