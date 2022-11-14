@@ -10,7 +10,10 @@
 (setq gc-cons-threshold most-positive-fixnum
       gc-cons-percentage 0.6
       file-name-handler-alist nil
-      site-run-file nil)
+      site-run-file nil
+      vc-follow-symlinks t)
+    
+
 
 (defvar ian/gc-cons-threshold 100000000)
 

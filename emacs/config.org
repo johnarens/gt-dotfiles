@@ -5,6 +5,10 @@ This is my configuration for Emacs 26.3 that comes with Ubuntu 20.04.
 
 * Settings independent of packages
 #+BEGIN_SRC emacs-lisp
+  
+  ;; Don't use TABS for indentations.
+  (setq-default indent-tabs-mode nil)
+
   (defun jwa/frame-title-format ()
     (concat "%b" " " "<%f> " "  theme:" (symbol-name (car custom-enabled-themes))))
 
@@ -19,6 +23,7 @@ This is my configuration for Emacs 26.3 that comes with Ubuntu 20.04.
 
     (tool-bar-mode -1)
     ;; (menu-bar-mode -1)
+    (global-hl-line-mode 'toggle)
 
     ;; better scrolling experience
     (setq scroll-margin 0
@@ -363,11 +368,27 @@ Use ~C-n~ and ~C-p~ to navigate the tooltip.
 *** Flycheck
 A modern on-the-fly syntax checking extension -- absolute essential
 #+BEGIN_SRC emacs-lisp
-  (use-package flycheck
-    :config
-    (setq flycheck-python-flake8-executable "flake8")
-    (flycheck-select-checker 'python-flake8)
-    (global-flycheck-mode +1))
+  ;; (use-package flycheck
+  ;;   :config
+  ;;   (setq flycheck-python-flake8-executable "flake8")
+  ;;   (flycheck-select-checker 'python-flake8)
+  ;;   (global-flycheck-mode +1))
+
+  ;; (use-package flycheck
+  ;; :config (setq flycheck-checker 'python-flake8))
+
+(use-package flycheck
+  :config
+  (flycheck-add-mode 'python-flake8 'python-mode)
+  :hook (python-mode . flycheck-mode))
+  ;; :hook (flycheck-mode . python-mode))
+
+;; (add-hook 'python-mode-hook 'flycheck-mode)
+
+;; Automatically remove trailing whitespace when file is saved.
+;; (add-hook 'python-mode-hook
+;; (lambda () (add-to-list 'write-file-functions 'delete-trailing-whitespace)))
+
 #+END_SRC
 *** Org Mode
 Some minimal org mode tweaks: org-bullets gives our headings (h1, h2,
@@ -418,30 +439,22 @@ Markdown mode and Web mode, the latter covers our usages of HTML/CSS/JS/JSX/TS/T
 
 *** Language Server Protocol
 #+BEGIN_SRC emacs-lisp
-  (use-package lsp-mode
-    :hook ((python-mode c++-mode c-mode) . lsp-deferred)
-    :commands lsp)
+  ;; (use-package lsp-mode
+  ;;   :hook ((python-mode c++-mode c-mode) . lsp-deferred)
+  ;;   ;; :hook ((c++-mode c-mode) . lsp-deferred)
+  ;;   :commands lsp)
 
-  (use-package lsp-ui
-    :commands lsp-ui-mode
-    :config
-    (setq lsp-ui-doc-enable nil)
-    (setq lsp-ui-doc-header t)
-    (setq lsp-ui-doc-include-signature t)
-    (setq lsp-ui-doc-border (face-foreground 'default))
-    (setq lsp-ui-sideline-show-code-actions t)
-    (setq lsp-ui-sideline-delay 0.05))
-
-  (use-package lsp-pyright
-    :hook (python-mode . (lambda () (require 'lsp-pyright)))
-    :init (when (executable-find "python3")
-          (setq lsp-pyright-python-executable-cmd "python3")))
+  ;; (use-package lsp-pyright
+  ;;   :hook (python-mode . (lambda () (require 'lsp-pyright)))
+  ;;   :init (when (executable-find "python3")
+  ;;         (setq lsp-pyright-python-executable-cmd "python3")))
 
   (use-package lsp-mode
     :hook ((c-mode          ; clangd
             c++-mode        ; clangd
             c-or-c++-mode   ; clangd
-            python-mode     ; pyright
+            ;; python-mode     ; pyright
+            ;; python-mode     ; jedi
             web-mode        ; ts-ls/HTML/CSS
             ) . lsp-deferred)
     :commands lsp
@@ -464,8 +477,57 @@ Markdown mode and Web mode, the latter covers our usages of HTML/CSS/JS/JSX/TS/T
     (setq read-process-output-max (* 1024 1024)) ;; 1MB
     (setq lsp-idle-delay 0.5))
 
+  (use-package lsp-ui
+    :commands lsp-ui-mode
+    :config
+    (setq lsp-ui-doc-enable nil)
+    (setq lsp-ui-doc-header t)
+    (setq lsp-ui-doc-include-signature t)
+    (setq lsp-ui-doc-border (face-foreground 'default))
+    (setq lsp-ui-sideline-show-code-actions t)
+    (setq lsp-ui-sideline-delay 0.05))
+
+;; (use-package lsp-jedi
+;;   :ensure t
+;;   :config
+;;   (with-eval-after-load "lsp-mode"
+;;     (add-to-list 'lsp-disabled-clients 'pyls)
+;;     (add-to-list 'lsp-enabled-clients 'jedi)))
+;; 
 
 #+END_SRC
+*** python-mode
+#+BEGIN_SRC emacs-lisp
+;;   (use-package python-mode
+;;     :hook (setq flycheck-enabled-checkers '(python-flake8 python-mypy))
+;;           (setq flycheck-disabled-checkers '(python-pylint))
+;;           (flycheck-select-checker 'python-flake8))
+
+;; Need to do:
+;; pip3 install -U jedi-language-server
+;; pip3 install -U pyflakes
+;; pip3 install -U flake8
+;; (add-hook 'python-mode-hook 'flycheck-mode) 
+;; (add-hook 'after-init-hook #'global-flycheck-mode)
+
+;; (use-package flychecker
+;;   :hook (setq flycheck-checker 'python-flake8))
+
+(defun my-checker ()
+  (interactive)
+  (message "Ran my-checker")
+  (flycheck-select-checker 'python-flake8))
+
+;; (with-eval-after-load "jedi" (my-checker))
+
+;; This might still be needed
+;; (add-hook 'flycheck-mode-hook #'my-checker)
+
+
+;; (add-hook 'python-mode #'(lambda () (flycheck-select-checker 'python-flake8)))
+
+#+END_SRC
+
 ** Miscellaneous
 *** Diminish minor modes
 The diminish package is used to hide unimportant minor modes in the
@@ -496,3 +558,4 @@ Provides us with hints on available keystroke combinations.
   (use-package neotree
     :bind ("<f8>" . neotree-toggle))
 #+END_SRC
+
