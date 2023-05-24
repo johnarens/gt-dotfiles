@@ -7,6 +7,26 @@ stow -v -t ~/.emacs.d ~/git/gt-dotfiles/emacs
 stow -v -R -t ~/.emacs.d -d ~/git/gt-dotfiles emacs  
 
 
+## Some examples
+mv ~/.xinitrc ~/git/gt-dotfiles/base/dot-xinitrc
+stow -v --dotfiles base -t ~
+
+mv ~/.bashrc base/.
+stow -v --dotfiles base -t ~
+
+mv ~/.profile ~/git/gt-dotfiles/base/dot-profile
+stow -v --dotfiles base -t ~
+
+mv ~/.ssh ~/git/gt-dotfiles/ssh/.
+stow -v --dotfiles ssh -t ~
+
+mkdir -p vscode/dot-config/Code/User
+mv ~/.config/Code/User/settings.json vscode/dot-config/Code/User/settings.json
+mv ~/.config/Code/User/keybindings.json vscode/dot-config/Code/User/.
+The following did not work.
+stow -vn --dotfiles vscode -t ~
+
+
 ## Python IDE Notes
 ### Static type checker for Python
 https://www.npmjs.com/package/pyright  

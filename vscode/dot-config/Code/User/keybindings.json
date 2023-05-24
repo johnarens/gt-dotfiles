@@ -1,0 +1,13 @@
+// Place your key bindings in this file to override the defaultsauto[]
+[
+    {
+        "key": "home",
+        "command": "emacs-mcx.beginningOfBuffer",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "end",
+        "command": "emacs-mcx.endOfBuffer",
+        "when": "editorTextFocus"
+    }
+]

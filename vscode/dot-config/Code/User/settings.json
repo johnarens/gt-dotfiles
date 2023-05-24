@@ -1,0 +1,10 @@
+{
+    "message": null,
+    "emacs-mcx.strictEmacsMove": true,
+    "emacs-mcx.useMetaPrefixEscape": true,
+
+    "[systemverilog]": {
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true
+    }
+}
