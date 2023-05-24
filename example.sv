@@ -1,12 +1,16 @@
-module example #()
+module example
+  #(
+    parameter WIDTH = 32,
+    parameter DEPTH = 16
+    )
    (
-    input  clk,
-    input  en,
-    input  d,
+    input        clk,
+    input        en,
+    input        d,
     output logic q,
-    input  x,
-    output y
-   );
+    input        x,
+    output       y
+    );
    
    logic   y_int;
    
@@ -22,7 +26,7 @@ module example #()
       
    end
 
-/*
+   /*
    always_ff @(posedge clk)
    begin
       if (en)
@@ -30,7 +34,7 @@ module example #()
          q <= d;
       end
    end
-*/
+    */
 
    always_ff @(posedge clk)
      if (en) q <= d;
