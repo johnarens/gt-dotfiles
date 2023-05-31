@@ -26,6 +26,9 @@ mv ~/.config/Code/User/keybindings.json vscode/dot-config/Code/User/.
 The following did not work.
 stow -vn --dotfiles vscode -t ~
 
+mv ~/.config/polybar polybar
+mkdir ~/.config/polybar
+stow -v -t ~/.config/polybar polybar
 
 ## Python IDE Notes
 ### Static type checker for Python
